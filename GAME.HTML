@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>150kg 안경 돼지 뚱뚱보 우주 발사! - 해적 게임</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter & Binggrae-style fonts for an appealing game look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Jua&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Jua', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            overflow-x: hidden;
+        }
+        /* Custom neon glowing animations */
+        .glow-active {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7);
+            animation: pulse-glow 1.5s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
+            to { box-shadow: 0 0 25px rgba(236, 72, 153, 0.9); }
+        }
+        /* Shake effect for the barrel when safe sword is inserted */
+        .shake-gentle {
+            animation: shake 0.4s ease-in-out;
+        }
+        /* Massive shake for trigger explosion */
+        .shake-extreme {
+            animation: shake-heavy 1.2s infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        @keyframes shake-heavy {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-8px, -8px) rotate(-3deg); }
+            20% { transform: translate(8px, 5px) rotate(3deg); }
+            30% { transform: translate(-10px, 8px) rotate(-1deg); }
+            40% { transform: translate(10px, -5px) rotate(2deg); }
+            50% { transform: translate(-8px, 5px) rotate(-2deg); }
+            60% { transform: translate(8px, 8px) rotate(3deg); }
+            70% { transform: translate(-5px, -8px) rotate(-1deg); }
+            80% { transform: translate(10px, 5px) rotate(2deg); }
+            90% { transform: translate(-8px, -5px) rotate(-3deg); }
+        }
+        /* Floating animation for pig in outer space */
+        .space-float {
+            animation: space-floating 4s ease-in-out infinite alternate;
+        }
+        @keyframes space-floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-30px) rotate(360deg); }
+        }
+        /* Sparkle/trail style styling */
+        .star-layer {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white flex flex-col justify-between selection:bg-pink-500 selection:text-white">
+
+<header class="py-4 px-6 bg-slate-900/60 backdrop-blur-md border-b border-slate-800 flex justify-between items-center z-10">
+    <div class="flex items-center gap-3">
+        <span class="text-3xl">🐷</span>
+        <div>
+            <h1 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">
+                150kg 안경 돼지 뚱뚱보 발사기!
+            </h1>
+            <p class="text-xs text-slate-400">칼을 꽂아 돼지를 우주 정거장으로 무임 승차 시키세요!</p>
+        </div>
+    </div>
+    <!-- Sound settings -->
+    <button id="sound-btn" onclick="toggleMute()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center gap-2 transition duration-200">
+        <span id="sound-icon">🔊</span>
+        <span class="text-sm hidden sm:inline">효과음 On</span>
+    </button>
+</header>
+
+<main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+    
+    <!-- Left Column: Players Panel & Activity Log -->
+    <div class="lg:col-span-4 flex flex-col gap-6 h-full">
+        <div class="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 p-5 rounded-2xl shadow-xl">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-pink-400">
+                🗡️ 턴 순서 (순찰 대기중)
+            </h2>
+            <div id="players-list" class="space-y-3">
+                <!-- Players will be rendered dynamically -->
+            </div>
+            
+            <div class="mt-4 p-3 bg-indigo-950/40 border border-indigo-900/50 rounded-xl text-center">
+                <p class="text-xs text-slate-400">다음 차례인 플레이어는 원하는 나무통 구멍을 클릭하세요!</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 p-5 rounded-2xl shadow-xl flex-1 flex flex-col min-h-[220px]">
+            <h2 class="text-lg font-bold mb-3 flex items-center justify-between text-indigo-400">
+                <span>📜 실시간 로그</span>
+                <span class="text-xs bg-indigo-900/50 px-2 py-1 rounded text-slate-300 font-mono" id="slot-counter">남은 안전 구멍: 16개</span>
+            </h2>
+            <div id="game-log" class="overflow-y-auto max-h-[180px] lg:max-h-[280px] space-y-2 flex-1 text-sm font-sans text-slate-300 pr-2">
+                <!-- Logs will appear here -->
+                <div class="text-slate-500 italic text-center py-4">게임이 시작되면 꽂는 기록이 여기에 실시간으로 표시됩니다.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center/Right Column: Pig, Barrel, and Space Launch Viewport -->
+    <div class="lg:col-span-8 flex flex-col gap-4 items-center justify-center w-full">
+        <div class="relative w-full aspect-square md:aspect-[4/3] bg-slate-950/70 border-2 border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center" id="gameplay-area">
+            
+            <!-- Standard Outer Space Starfield Canvas (Inactive until launched, or subtle back stars) -->
+            <canvas id="space-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-1000 z-0"></canvas>
+
+            <!-- Regular Sky/Forest Background -->
+            <div id="normal-bg" class="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-indigo-900 transition-opacity duration-1000 z-0">
+                <!-- Stylized background grid pattern -->
+                <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+                <!-- Mini cloud decor -->
+                <div class="absolute top-10 left-10 text-4xl opacity-20 animate-bounce" style="animation-duration: 6s;">☁️</div>
+                <div class="absolute top-20 right-16 text-5xl opacity-25 animate-bounce" style="animation-duration: 8s;">☁️</div>
+            </div>
+
+            <div id="roulette-rig" class="relative z-10 flex flex-col items-center justify-center w-full max-w-[450px] transition-transform duration-500">
+                
+                <!-- Pig container (This will zoom off on POP!) -->
+                <div id="pig-container" class="relative z-20 cursor-pointer transition-all duration-700 ease-in-out transform origin-bottom">
+                    <!-- Pig SVG -->
+                    <svg class="w-48 h-48 md:w-56 md:h-56 filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Glasses Strap -->
+                        <path d="M 30 110 Q 100 120 170 110" stroke="#1e293b" stroke-width="6" fill="none" />
+                        
+                        <!-- Pig Body (Super fat 150kg structure) -->
+                        <ellipse cx="100" cy="120" rx="75" ry="65" fill="#fbcfe8" stroke="#ec4899" stroke-width="4" />
+                        
+                        <!-- Pig Ears -->
+                        <!-- Left Ear -->
+                        <path d="M 45 70 C 30 40, 15 50, 35 80 Z" fill="#fbcfe8" stroke="#ec4899" stroke-width="3" />
+                        <path d="M 41 71 C 33 52, 25 58, 35 77 Z" fill="#f472b6" />
+                        <!-- Right Ear -->
+                        <path d="M 155 70 C 170 40, 185 50, 165 80 Z" fill="#fbcfe8" stroke="#ec4899" stroke-width="3" />
+                        <path d="M 159 71 C 167 52, 175 58, 165 77 Z" fill="#f472b6" />
+
+                        <!-- Fat Double Chin Shadows -->
+                        <ellipse cx="100" cy="165" rx="55" ry="15" fill="#f472b6" opacity="0.3" />
+                        <ellipse cx="100" cy="155" rx="65" ry="12" fill="#f472b6" opacity="0.2" />
+
+                        <!-- Chubby Cheeks -->
+                        <circle cx="55" cy="130" r="14" fill="#f472b6" opacity="0.5" />
+                        <circle cx="145" cy="130" r="14" fill="#f472b6" opacity="0.5" />
+
+                        <!-- Glasses (Spectacles) -->
+                        <!-- Left Rim -->
+                        <circle cx="65" cy="110" r="24" fill="none" stroke="#0f172a" stroke-width="5" />
+                        <circle cx="65" cy="110" r="21" fill="rgba(147, 197, 253, 0.2)" stroke="#38bdf8" stroke-width="2" />
+                        <!-- Glasses bridge -->
+                        <path d="M 89 110 L 111 110" stroke="#0f172a" stroke-width="5" />
+                        <!-- Right Rim -->
+                        <circle cx="135" cy="110" r="24" fill="none" stroke="#0f172a" stroke-width="5" />
+                        <circle cx="135" cy="110" r="21" fill="rgba(147, 197, 253, 0.2)" stroke="#38bdf8" stroke-width="2" />
+
+                        <!-- Eyes (Behind glass, slightly derp and cute) -->
+                        <circle cx="70" cy="110" r="7" fill="#0f172a" />
+                        <circle cx="72" cy="108" r="2.5" fill="white" />
+                        <circle cx="130" cy="110" r="7" fill="#0f172a" />
+                        <circle cx="132" cy="108" r="2.5" fill="white" />
+
+                        <!-- Pig Snout (Very wide and chubby) -->
+                        <ellipse cx="100" cy="135" rx="22" ry="15" fill="#f472b6" stroke="#db2777" stroke-width="3" />
+                        <!-- Nostrils -->
+                        <circle cx="92" cy="135" r="4.5" fill="#be185d" />
+                        <circle cx="108" cy="135" r="4.5" fill="#be185d" />
+
+                        <!-- Cute Mouth with tongue showing -->
+                        <path d="M 90 152 Q 100 162 110 152" stroke="#db2777" stroke-width="3" fill="none" />
+
+                        <!-- Weight Badge (150kg) -->
+                        <rect x="68" y="160" width="64" height="18" rx="9" fill="#e2e8f0" stroke="#475569" stroke-width="2" />
+                        <text x="100" y="173" font-family="'Inter', sans-serif" font-weight="900" font-size="11" fill="#1e293b" text-anchor="middle">150kg</text>
+                    </svg>
+
+                    <!-- Bubble dialog for comical reaction -->
+                    <div id="pig-bubble" class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-950 font-extrabold text-sm py-1.5 px-3 rounded-xl shadow-lg border-2 border-slate-800 whitespace-nowrap transition-all opacity-100 scale-100">
+                        🐷 살살 꽂아라 꿀~! (150kg는 무겁다구)
+                    </div>
+                </div>
+
+                <!-- The Barrel -->
+                <div id="barrel" class="relative -mt-10 z-10 w-64 h-56 transition-all duration-300">
+                    <!-- Barrel Wood Graphics -->
+                    <div class="absolute inset-0 bg-amber-800 border-4 border-amber-950 rounded-b-[40px] rounded-t-[10px] overflow-hidden shadow-2xl">
+                        <!-- Wooden Planks Vertical details -->
+                        <div class="absolute left-1/5 top-0 bottom-0 w-[4px] bg-amber-950 opacity-40"></div>
+                        <div class="absolute left-2/5 top-0 bottom-0 w-[4px] bg-amber-950 opacity-40"></div>
+                        <div class="absolute left-3/5 top-0 bottom-0 w-[4px] bg-amber-950 opacity-40"></div>
+                        <div class="absolute left-4/5 top-0 bottom-0 w-[4px] bg-amber-950 opacity-40"></div>
+                        
+                        <!-- Dark horizontal iron bands -->
+                        <div class="absolute left-0 right-0 top-10 h-[12px] bg-zinc-800 border-y border-zinc-950 flex items-center justify-around">
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                        </div>
+                        <div class="absolute left-0 right-0 bottom-12 h-[12px] bg-zinc-800 border-y border-zinc-950 flex items-center justify-around">
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                        </div>
+
+                        <!-- Shadow/Depth mask at the top opening -->
+                        <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-amber-950 to-transparent"></div>
+                    </div>
+
+                    <!-- Sword insertion slot overlay container -->
+                    <div id="slots-overlay" class="absolute inset-0 p-4 grid grid-cols-4 gap-x-2 gap-y-4 items-center justify-items-center z-20">
+                        <!-- Slots will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Ground Shadow for physical presence -->
+                <div id="barrel-shadow" class="w-56 h-6 bg-black/40 blur-md rounded-full mt-2 transition-opacity duration-500"></div>
+            </div>
+
+            <!-- Outer Space Overlay Screens (Initially hidden) -->
+            <div id="launch-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-700 z-30">
+                <div class="text-center p-6 max-w-md transform scale-75 transition-all duration-700" id="launch-card">
+                    <!-- Space Pig Orbit Image -->
+                    <div class="relative w-44 h-44 mx-auto mb-6 space-float">
+                        <div class="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+                        <!-- Astronaut Piggy floating -->
+                        <svg class="w-full h-full filter drop-shadow-[0_10px_20px_rgba(56,189,248,0.4)]" viewBox="0 0 200 200">
+                            <!-- Helmet Bubble -->
+                            <circle cx="100" cy="100" r="70" fill="rgba(186, 230, 253, 0.25)" stroke="#38bdf8" stroke-width="3" />
+                            <ellipse cx="140" cy="70" rx="10" ry="20" fill="white" opacity="0.4" transform="rotate(30, 140, 70)" />
+                            
+                            <!-- Inside Astronaut Piggy -->
+                            <circle cx="100" cy="105" r="50" fill="#fbcfe8" />
+                            <ellipse cx="100" cy="115" rx="16" ry="11" fill="#f472b6" />
+                            <circle cx="94" cy="115" r="3" fill="#be185d" />
+                            <circle cx="106" cy="115" r="3" fill="#be185d" />
+                            <!-- Pig Glasses in Space -->
+                            <circle cx="78" cy="98" r="14" fill="none" stroke="#0f172a" stroke-width="4" />
+                            <circle cx="122" cy="98" r="14" fill="none" stroke="#0f172a" stroke-width="4" />
+                            <line x1="92" y1="98" x2="108" y2="98" stroke="#0f172a" stroke-width="4" />
+                            <circle cx="80" cy="98" r="4" fill="#0f172a" />
+                            <circle cx="120" cy="98" r="4" fill="#0f172a" />
+                            <!-- Space suit badge -->
+                            <rect x="85" y="132" width="30" height="12" rx="6" fill="#1e293b" />
+                            <text x="100" y="141" fill="white" font-size="7" font-weight="bold" text-anchor="middle">150kg</text>
+                        </svg>
+                        <div class="absolute -top-4 -right-2 text-3xl">🚀</div>
+                        <div class="absolute -bottom-2 -left-2 text-3xl">🪐</div>
+                    </div>
+
+                    <h3 class="text-3xl md:text-4xl font-extrabold text-pink-500 mb-2 animate-bounce">
+                        우주선 발사 성공!!!
+                    </h3>
+                    <div class="bg-indigo-950/80 border border-indigo-500/30 p-4 rounded-2xl mb-6 shadow-inner">
+                        <p class="text-slate-300 text-sm mb-1">범인을 발표합니다!</p>
+                        <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-500" id="loser-announcement">
+                            [플레이어 이름]
+                        </p>
+                        <p class="text-xs text-indigo-400 mt-2">
+                            어마무시한 150kg의 하중을 이겨내고<br>피그를 저 먼 안드로메다로 발사하였습니다!
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button onclick="resetGame()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-extrabold rounded-xl shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 transition duration-200">
+                            🔄 복수전 하러 가기 (다시 시작)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Quick Game Rules & Controls footer -->
+        <div class="w-full flex justify-between items-center bg-slate-900/40 p-3 rounded-2xl border border-slate-800">
+            <span class="text-xs text-slate-400">
+                💡 순서대로 칼을 빈 구멍에 꽂으세요. 우주로 발사시키는 사람이 **패배(혹은 벌칙!)**입니다!
+            </span>
+            <button onclick="resetGame()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 px-3 py-1.5 rounded-lg font-bold transition">
+                새 게임 시작
+            </button>
+        </div>
+    </div>
+
+</main>
+
+<footer class="py-4 text-center text-xs text-slate-600 border-t border-slate-900 bg-slate-950/80">
+    <p>© 2026 돼지 뚱뚱보 150kg 우주 정거장 발사 룰렛. All rights reserved.</p>
+</footer>
+
+<script>
+    // Sound engine configuration (Web Audio API)
+    let audioCtx = null;
+    let isMuted = false;
+
+    // Game players matching requirements
+    const players = [
+        { name: "장현원", color: "#3b82f6", emoji: "🔵" }, // Blue
+        { name: "고재용", color: "#ef4444", emoji: "🔴" }, // Red
+        { name: "최대휘", color: "#22c55e", emoji: "🟢" }, // Green
+        { name: "박준영", color: "#eab308", emoji: "🟡" }, // Yellow
+        { name: "김유중", color: "#a855f7", emoji: "🟣" }  // Purple
+    ];
+
+    let currentPlayerIndex = 0;
+    const totalSlots = 16;
+    let triggerSlot = -1;
+    let slotStates = []; // Array of { id: index, stabbed: boolean, playerIndex: number|null }
+    let gameOver = false;
+
+    // Canvas starfield variable reference
+    let spaceCanvas = document.getElementById('space-canvas');
+    let spaceCtx = spaceCanvas.getContext('2d');
+    let stars = [];
+    let animationFrameId = null;
+
+    // Comical pig phrases when safe
+    const safePhrases = [
+        "🐷 오오.. 안전하다 꿀! 식은땀 흘렸잖아!",
+        "🐷 으어억.. 살았당! 150kg가 움직이긴 무겁다구",
+        "🐷 헤헤.. 안경 흘러내릴 뻔했잖아! 다음 녀석 어서와!",
+        "🐷 크아아! 간질간질해서 재채기 나올 뻔 꿀!",
+        "🐷 이 구멍은 매우 안전하군! 돼지 뚱보 대만족!",
+        "🐷 휴... 150kg의 뱃살 덕분에 끄떡없군!",
+        "🐷 후덜덜.. 안경에 김 서린다 꿀! 제발 천천히 꽂아줘!"
+    ];
+
+    // Initialize Game on Window Load
+    window.onload = function() {
+        initGame();
+        // Setup canvas size
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+    };
+
+    function initGame() {
+        gameOver = false;
+        currentPlayerIndex = 0;
+        
+        // Randomize the secret trigger slot
+        triggerSlot = Math.floor(Math.random() * totalSlots);
+        
+        // Set up slots states
+        slotStates = [];
+        for (let i = 0; i < totalSlots; i++) {
+            slotStates.push({
+                id: i,
+                stabbed: false,
+                playerIndex: null
+            });
+        }
+
+        // Reset elements
+        const pigContainer = document.getElementById('pig-container');
+        pigContainer.className = "relative z-20 cursor-pointer transition-all duration-700 ease-in-out transform origin-bottom";
+        pigContainer.style.transform = "translateY(0) scale(1) rotate(0deg)";
+        pigContainer.style.opacity = "1";
+
+        const pigBubble = document.getElementById('pig-bubble');
+        pigBubble.className = "absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-950 font-extrabold text-sm py-1.5 px-3 rounded-xl shadow-lg border-2 border-slate-800 whitespace-nowrap opacity-100 scale-100";
+        pigBubble.innerText = "🐷 살살 꽂아라 꿀~! (150kg는 무겁다구)";
+
+        const normalBg = document.getElementById('normal-bg');
+        normalBg.style.opacity = "1";
+
+        spaceCanvas.style.opacity = "0";
+        cancelAnimationFrame(animationFrameId);
+
+        const launchOverlay = document.getElementById('launch-overlay');
+        launchOverlay.classList.remove('opacity-100');
+        launchOverlay.classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('launch-card').classList.add('scale-75');
+
+        // Draw Player Panel
+        renderPlayers();
+
+        // Draw Slots
+        renderSlots();
+
+        // Reset Activity Log
+        const gameLog = document.getElementById('game-log');
+        gameLog.innerHTML = '<div class="text-pink-400 font-bold text-center py-2">🎮 게임이 시작되었습니다! 장현원 차례입니다.</div>';
+
+        document.getElementById('slot-counter').innerText = `남은 안전 구멍: ${totalSlots}개`;
+        
+        // Resume any dynamic state logic
+        console.log("Trigger Slot Index: ", triggerSlot); // Developer-only insight
+    }
+
+    // Initialize Web Audio context safely
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playSound(type) {
+        if (isMuted) return;
+        initAudio();
+        if (!audioCtx) return;
+
+        try {
+            const now = audioCtx.currentTime;
+            
+            if (type === 'stab_safe') {
+                // Short metallic clean sound for safety insertion
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.15);
+
+                // Quick retro sub-bounce
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(250, audioCtx.currentTime);
+                    osc2.frequency.setValueAtTime(400, audioCtx.currentTime + 0.05);
+                    gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.start();
+                    osc2.stop(audioCtx.currentTime + 0.1);
+                }, 50);
+
+            } else if (type === 'launch') {
+                // Massive rocket explosion sound effect
+                // Noise buffer generation for blast
+                const bufferSize = audioCtx.sampleRate * 1.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(1000, now);
+                filter.frequency.exponentialRampToValueAtTime(50, now + 1.2);
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start(now);
+                noise.stop(now + 1.5);
+
+                // Add sweeping pitch laser synthesizer on top
+                const osc = audioCtx.createOscillator();
+                const oscGain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(2200, now + 0.8);
+                
+                oscGain.gain.setValueAtTime(0.12, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
+
+                osc.connect(oscGain);
+                oscGain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 1.0);
+            }
+        } catch (e) {
+            console.warn("Audio synthesis failed: ", e);
+        }
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        const soundIcon = document.getElementById('sound-icon');
+        const soundBtn = document.getElementById('sound-btn');
+        if (isMuted) {
+            soundIcon.innerText = "🔇";
+            soundBtn.querySelector('span:last-child').innerText = "효과음 Off";
+        } else {
+            soundIcon.innerText = "🔊";
+            soundBtn.querySelector('span:last-child').innerText = "효과음 On";
+            initAudio();
+        }
+    }
+
+    function renderPlayers() {
+        const listContainer = document.getElementById('players-list');
+        listContainer.innerHTML = '';
+
+        players.forEach((player, index) => {
+            const isActive = index === currentPlayerIndex;
+            const playerCard = document.createElement('div');
+            playerCard.className = `flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${
+                isActive 
+                ? 'bg-pink-950/40 border-pink-500 text-white font-extrabold scale-102 glow-active' 
+                : 'bg-slate-950/40 border-slate-800/80 text-slate-400'
+            }`;
+
+            playerCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-xl" style="color: ${player.color}">${player.emoji}</span>
+                    <div>
+                        <span class="${isActive ? 'text-pink-300 font-extrabold' : 'text-slate-300'}">${player.name}</span>
+                        ${isActive ? '<span class="ml-2 text-xs text-pink-400 bg-pink-950 px-1.5 py-0.5 rounded font-bold animate-pulse">CHALLENGER</span>' : ''}
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md flex items-center justify-center border" style="background-color: ${player.color}; border-color: ${player.color}dd">
+                        <span class="text-[10px] text-white">🗡️</span>
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(playerCard);
+        });
+    }
+
+    function renderSlots() {
+        const slotsOverlay = document.getElementById('slots-overlay');
+        slotsOverlay.innerHTML = '';
+
+        for (let i = 0; i < totalSlots; i++) {
+            const slot = slotStates[i];
+            const slotButton = document.createElement('button');
+            
+            // Build absolute-like positioning values to distribute nicely across the barrel
+            slotButton.className = `relative w-12 h-10 md:w-14 md:h-11 rounded-lg flex items-center justify-center transition-all duration-300 transform border-2 ${
+                slot.stabbed 
+                ? 'cursor-not-allowed scale-95 shadow-inner' 
+                : 'bg-slate-900/90 border-amber-900 hover:border-pink-500 hover:scale-105 active:scale-95 cursor-pointer shadow-lg'
+            }`;
+
+            if (slot.stabbed) {
+                // Render inserted sword colored according to the player who stabbed it
+                const stabber = players[slot.playerIndex];
+                slotButton.style.backgroundColor = stabber.color;
+                slotButton.style.borderColor = "#ffffff44";
+                slotButton.innerHTML = `
+                    <svg class="w-8 h-8 filter drop-shadow" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <path d="M12 2v14M8 11h8M10 16h4M12 16v6" stroke-linecap="round"/>
+                    </svg>
+                `;
+            } else {
+                // Empty slots
+                slotButton.innerHTML = `
+                    <div class="w-3 h-3 bg-black rounded-full border border-slate-700/60 shadow-inner flex items-center justify-center group-hover:bg-slate-800">
+                        <span class="text-[8px] text-slate-500 font-mono">${i + 1}</span>
+                    </div>
+                `;
+                slotButton.onclick = () => handleStab(i);
+            }
+
+            slotsOverlay.appendChild(slotButton);
+        }
+    }
+
+    function handleStab(slotIndex) {
+        if (gameOver || slotStates[slotIndex].stabbed) return;
+
+        // Set stabbed state
+        slotStates[slotIndex].stabbed = true;
+        slotStates[slotIndex].playerIndex = currentPlayerIndex;
+
+        const logContainer = document.getElementById('game-log');
+        const activePlayer = players[currentPlayerIndex];
+
+        // Highlight the barrel for mechanical action feel
+        const barrel = document.getElementById('barrel');
+        barrel.classList.remove('shake-gentle');
+        void barrel.offsetWidth; // Trigger reflow for animation reset
+
+        // Evaluate Result
+        if (slotIndex === triggerSlot) {
+            // TRIGGER OUT OF ORBIT! Launch!
+            gameOver = true;
+            barrel.classList.add('shake-extreme');
+            
+            // Play massive launch sounds
+            playSound('launch');
+
+            // Log event
+            const logEntry = document.createElement('div');
+            logEntry.className = 'p-2 bg-red-950/40 border-l-4 border-red-500 text-red-200 text-xs rounded-r-lg font-bold animate-pulse';
+            logEntry.innerHTML = `🚨 [${activePlayer.name}]이(가) 결국 비밀 구멍(${slotIndex + 1}번)에 칼을 꽂아 150kg 안경 돼지를 성층권 밖으로 발사했습니다!`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            triggerSpaceLaunch(activePlayer);
+        } else {
+            // SAFE! Move to next turn
+            barrel.classList.add('shake-gentle');
+            playSound('stab_safe');
+
+            // Random comical phrase
+            const phrase = safePhrases[Math.floor(Math.random() * safePhrases.length)];
+            const pigBubble = document.getElementById('pig-bubble');
+            pigBubble.innerText = phrase;
+            
+            // Small bubble animation bounce
+            pigBubble.classList.add('scale-110');
+            setTimeout(() => pigBubble.classList.remove('scale-110'), 200);
+
+            // Log safe attempt
+            const logEntry = document.createElement('div');
+            logEntry.className = 'p-2 bg-indigo-950/30 border-l-4 border-emerald-500 text-emerald-300 text-xs rounded-r-lg';
+            logEntry.innerHTML = `✅ [${activePlayer.name}] 안전! (${slotIndex + 1}번 꽂음)`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // Increment Turn Index
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+
+            // Count safe slots left
+            const safeLeft = slotStates.filter(s => !s.stabbed).length;
+            document.getElementById('slot-counter').innerText = `남은 안전 구멍: ${safeLeft}개`;
+
+            // Refresh panel styles
+            renderPlayers();
+            renderSlots();
+        }
+    }
+
+    function triggerSpaceLaunch(loserPlayer) {
+        const pigContainer = document.getElementById('pig-container');
+        const pigBubble = document.getElementById('pig-bubble');
+        const normalBg = document.getElementById('normal-bg');
+
+        // Hide conversational bubble instantly
+        pigBubble.className = "absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-950 font-extrabold text-sm py-1.5 px-3 rounded-xl shadow-lg border-2 border-slate-800 whitespace-nowrap transition-all opacity-0 scale-50";
+
+        // Step 1: Launch pig SVG upwards and rotate, simulating a physics zoom-off
+        setTimeout(() => {
+            pigContainer.style.transform = "translateY(-500px) scale(0.1) rotate(1440deg)";
+            pigContainer.style.opacity = "0";
+        }, 150);
+
+        // Step 2: Show hyperdrive canvas and turn background black
+        setTimeout(() => {
+            normalBg.style.opacity = "0";
+            spaceCanvas.style.opacity = "1";
+            initStarfield();
+        }, 400);
+
+        // Step 3: Present orbital congratulations screen and state results
+        setTimeout(() => {
+            document.getElementById('loser-announcement').innerText = `${loserPlayer.emoji} ${loserPlayer.name}`;
+            
+            const launchOverlay = document.getElementById('launch-overlay');
+            launchOverlay.classList.remove('pointer-events-none', 'opacity-0');
+            launchOverlay.classList.add('opacity-100');
+            
+            // Pop active card animation
+            setTimeout(() => {
+                document.getElementById('launch-card').classList.remove('scale-75');
+                document.getElementById('launch-card').classList.add('scale-100');
+            }, 100);
+
+            // Remove excessive barrel shaking
+            document.getElementById('barrel').classList.remove('shake-extreme');
+        }, 1800);
+    }
+
+    function resizeCanvas() {
+        const rect = gameplayArea().getBoundingClientRect();
+        spaceCanvas.width = rect.width;
+        spaceCanvas.height = rect.height;
+    }
+
+    function gameplayArea() {
+        return document.getElementById('gameplay-area');
+    }
+
+    // 2D Hyperdrive cosmic flythrough logic
+    function initStarfield() {
+        stars = [];
+        const numStars = 80;
+        const centerX = spaceCanvas.width / 2;
+        const centerY = spaceCanvas.height / 2;
+
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: (Math.random() - 0.5) * spaceCanvas.width,
+                y: (Math.random() - 0.5) * spaceCanvas.height,
+                z: Math.random() * spaceCanvas.width,
+                color: getRandomStarColor()
+            });
+        }
+
+        animateStarfield();
+    }
+
+    function getRandomStarColor() {
+        const colors = ['#38bdf8', '#c084fc', '#f472b6', '#ffffff', '#818cf8'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function animateStarfield() {
+        spaceCtx.fillStyle = 'rgba(15, 23, 42, 0.2)'; // Faux motion blur trail
+        spaceCtx.fillRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+
+        const centerX = spaceCanvas.width / 2;
+        const centerY = spaceCanvas.height / 2;
+
+        stars.forEach(star => {
+            star.z -= 4; // Move closer
+
+            // Recenter coordinates when star flies past user camera
+            if (star.z <= 0) {
+                star.z = spaceCanvas.width;
+                star.x = (Math.random() - 0.5) * spaceCanvas.width;
+                star.y = (Math.random() - 0.5) * spaceCanvas.height;
+            }
+
+            // Translate dynamic 3D depth position projection
+            const px = (star.x / star.z) * spaceCanvas.width + centerX;
+            const py = (star.y / star.z) * spaceCanvas.height + centerY;
+            const size = ((spaceCanvas.width - star.z) / spaceCanvas.width) * 5;
+
+            // Draw line trail representation
+            spaceCtx.beginPath();
+            spaceCtx.strokeStyle = star.color;
+            spaceCtx.lineWidth = size / 2;
+            const trailLength = 1.3;
+            const prevPx = (star.x / (star.z + 15)) * spaceCanvas.width + centerX;
+            const prevPy = (star.y / (star.z + 15)) * spaceCanvas.height + centerY;
+
+            spaceCtx.moveTo(px, py);
+            spaceCtx.lineTo(prevPx, prevPy);
+            spaceCtx.stroke();
+        });
+
+        animationFrameId = requestAnimationFrame(animateStarfield);
+    }
+
+    function resetGame() {
+        initGame();
+    }
+</script>
+
+</body>
+</html>
